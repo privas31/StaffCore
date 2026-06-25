@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StaffCore — Panel de Agencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #1e2d5a;
+    --navy-hover: #162247;
+    --navy-light: #2a3f7e;
+    --navy-pale: #eef1f9;
+    --gold: #f0a500;
+    --gold-pale: #fff8e6;
+    --sidebar-w: 220px;
+    --topbar-h: 56px;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08);
+    --border: 1px solid #e8eaf0;
+    --bg: #f4f5f9;
+    --white: #ffffff;
+    --text: #1a1f36;
+    --text-muted: #6b7280;
+    --text-light: #9ca3af;
+    --success: #16a34a;
+    --success-bg: #dcfce7;
+    --danger: #dc2626;
+    --danger-bg: #fee2e2;
+    --warning: #d97706;
+    --warning-bg: #fef3c7;
+    --info: #2563eb;
+    --info-bg: #dbeafe;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── LOGIN ── */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--navy);
+  }
+  .login-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  }
+  .login-logo {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .login-logo .brand { font-size: 28px; font-weight: 600; color: var(--navy); letter-spacing: -0.5px; }
+  .login-logo .brand span { color: var(--gold); }
+  .login-logo .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+  .form-group input {
+    width: 100%; padding: 10px 14px; border: 1px solid #d1d5db;
+    border-radius: var(--radius-sm); font-size: 14px; font-family: inherit;
+    transition: border-color .2s; outline: none; color: var(--text);
+  }
+  .form-group input:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(30,45,90,.1); }
+  .btn-login {
+    width: 100%; padding: 11px; background: var(--navy); color: #fff;
+    border: none; border-radius: var(--radius-sm); font-size: 14px;
+    font-weight: 500; cursor: pointer; transition: background .2s; font-family: inherit;
+  }
+  .btn-login:hover { background: var(--navy-hover); }
+  .login-error { font-size: 12px; color: var(--danger); margin-top: 10px; text-align: center; display: none; }
+
+  /* ── APP SHELL ── */
+  #app-screen { display: none; min-height: 100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: var(--sidebar-w);
+    background: var(--white);
+    border-right: var(--border);
+    display: flex; flex-direction: column;
+    z-index: 100;
+    overflow-y: auto;
+  }
+  .sb-brand {
+    padding: 18px 16px 14px;
+    border-bottom: var(--border);
+    flex-shrink: 0;
+  }
+  .sb-brand .logo { font-size: 20px; font-weight: 600; color: var(--navy); letter-spacing: -.3px; }
+  .sb-brand .logo span { color: var(--gold); }
+  .sb-brand .agency-name { font-size: 11px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .sb-nav { flex: 1; padding: 10px 8px; }
+  .sb-section {
+    font-size: 10px; font-weight: 600; color: var(--text-light);
+    letter-spacing: .6px; text-transform: uppercase;
+    padding: 14px 8px 4px;
+  }
+  .sb-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; border-radius: var(--radius-sm);
+    font-size: 13px; color: var(--text-muted);
+    cursor: pointer; transition: all .15s; margin-bottom: 1px;
+    border: none; background: none; width: 100%; text-align: left; font-family: inherit;
+  }
+  .sb-item:hover { background: var(--bg); color: var(--text); }
+  .sb-item.active { background: var(--navy-pale); color: var(--navy); font-weight: 500; }
+  .sb-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: .7; }
+  .sb-item.active svg { opacity: 1; }
+  .sb-badge {
+    margin-left: auto; background: var(--danger); color: #fff;
+    font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center;
+  }
+
+  .sb-user {
+    padding: 12px 14px; border-top: var(--border);
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; flex-shrink: 0;
+  }
+  .av-navy { background: var(--navy-pale); color: var(--navy); }
+  .av-gold { background: var(--gold-pale); color: #92600a; }
+  .av-green { background: #dcfce7; color: #166534; }
+  .av-blue { background: #dbeafe; color: #1e40af; }
+  .sb-user-info { flex: 1; min-width: 0; }
+  .sb-user-info .name { font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sb-user-info .role { font-size: 11px; color: var(--text-muted); }
+  .btn-logout { background: none; border: none; cursor: pointer; color: var(--text-light); padding: 4px; border-radius: 4px; }
+  .btn-logout:hover { color: var(--danger); }
+
+  /* ── MAIN ── */
+  .main-wrap {
+    margin-left: var(--sidebar-w);
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  .topbar {
+    position: sticky; top: 0;
+    height: var(--topbar-h);
+    background: var(--white);
+    border-bottom: var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+    z-index: 50;
+    box-shadow: var(--shadow);
+  }
+  .topbar-left .page-title { font-size: 16px; font-weight: 600; color: var(--text); }
+  .topbar-left .page-sub { font-size: 12px; color: var(--text-muted); }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .btn-primary {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 16px; background: var(--navy); color: #fff;
+    border: none; border-radius: var(--radius-sm); font-size: 13px;
+    font-weight: 500; cursor: pointer; transition: background .15s; font-family: inherit;
+  }
+  .btn-primary:hover { background: var(--navy-hover); }
+  .btn-primary svg { width: 14px; height: 14px; }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: var(--radius-sm);
+    background: var(--bg); border: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative; transition: background .15s;
+  }
+  .icon-btn:hover { background: #e8eaf0; }
+  .icon-btn svg { width: 16px; height: 16px; color: var(--text-muted); }
+  .notif-dot {
+    position: absolute; top: 6px; right: 6px;
+    width: 7px; height: 7px; background: var(--danger);
+    border-radius: 50%; border: 1.5px solid var(--white);
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; padding: 24px; flex-direction: column; gap: 20px; }
+  .page.active { display: flex; }
+
+  /* ── STAT CARDS ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+  .stat-card {
+    background: var(--white); border: var(--border); border-radius: var(--radius);
+    padding: 16px 18px; position: relative; overflow: hidden;
+  }
+  .stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: var(--navy);
+  }
+  .stat-card.gold::before { background: var(--gold); }
+  .stat-card.green::before { background: var(--success); }
+  .stat-card.red::before { background: var(--danger); }
+  .stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 6px; }
+  .stat-value { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1; }
+  .stat-trend { font-size: 11px; margin-top: 6px; display: flex; align-items: center; gap: 3px; }
+  .trend-up { color: var(--success); }
+  .trend-down { color: var(--danger); }
+  .trend-neu { color: var(--text-muted); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--white); border: var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+  }
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-size: 13px; font-weight: 600; color: var(--text);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .card-title svg { width: 15px; height: 15px; color: var(--navy); }
+  .card-link { font-size: 12px; color: var(--navy); cursor: pointer; font-weight: 500; }
+  .card-link:hover { text-decoration: underline; }
+
+  /* ── GRID LAYOUTS ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  /* ── TABLES ── */
+  .sc-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .sc-table th {
+    font-weight: 500; color: var(--text-muted); padding: 6px 10px;
+    text-align: left; border-bottom: var(--border); background: var(--bg);
+  }
+  .sc-table td {
+    padding: 9px 10px; border-bottom: 1px solid #f0f1f5;
+    color: var(--text); vertical-align: middle;
+  }
+  .sc-table tr:last-child td { border-bottom: none; }
+  .sc-table tr:hover td { background: #fafbff; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 8px; border-radius: 20px;
+    font-size: 11px; font-weight: 500;
+  }
+  .b-green { background: var(--success-bg); color: #166534; }
+  .b-red { background: var(--danger-bg); color: #991b1b; }
+  .b-yellow { background: var(--warning-bg); color: #92400e; }
+  .b-blue { background: var(--info-bg); color: #1e40af; }
+  .b-gray { background: #f3f4f6; color: #374151; }
+  .b-navy { background: var(--navy-pale); color: var(--navy); }
+  .b-purple { background: #ede9fe; color: #5b21b6; }
+
+  /* ── RISK SEMAFORO ── */
+  .risk-list { display: flex; flex-direction: column; gap: 0; }
+  .risk-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid #f0f1f5;
+  }
+  .risk-row:last-child { border-bottom: none; }
+  .risk-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .r-green { background: #22c55e; }
+  .r-yellow { background: #f59e0b; }
+  .r-red { background: #ef4444; }
+  .risk-info { flex: 1; min-width: 0; }
+  .risk-name { font-size: 12px; font-weight: 500; }
+  .risk-reason { font-size: 11px; color: var(--text-muted); }
+
+  /* ── TALENT MATCH ── */
+  .match-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid #f0f1f5;
+  }
+  .match-item:last-child { border-bottom: none; }
+  .match-bar-bg { flex: 1; height: 5px; background: #e5e7eb; border-radius: 3px; }
+  .match-bar-fill { height: 5px; border-radius: 3px; }
+  .match-pct { font-size: 12px; font-weight: 600; min-width: 36px; text-align: right; }
+
+  /* ── ALERT ROWS ── */
+  .alert-list { display: flex; flex-direction: column; gap: 0; }
+  .alert-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid #f0f1f5;
+  }
+  .alert-row:last-child { border-bottom: none; }
+  .alert-icon {
+    width: 30px; height: 30px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .alert-icon svg { width: 14px; height: 14px; }
+  .ai-warn { background: var(--warning-bg); color: var(--warning); }
+  .ai-err { background: var(--danger-bg); color: var(--danger); }
+  .ai-info { background: var(--info-bg); color: var(--info); }
+  .ai-suc { background: var(--success-bg); color: var(--success); }
+  .alert-text .alert-title { font-size: 12px; font-weight: 500; }
+  .alert-text .alert-sub { font-size: 11px; color: var(--text-muted); }
+
+  /* ── RENTABILIDAD ── */
+  .profit-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 0; border-bottom: 1px solid #f0f1f5; font-size: 12px;
+  }
+  .profit-row:last-child { border-bottom: none; }
+  .profit-bar-wrap { display: flex; align-items: center; gap: 8px; flex: 1; margin: 0 12px; }
+  .profit-bar-bg { flex: 1; height: 5px; background: #e5e7eb; border-radius: 3px; }
+  .profit-bar-fill { height: 5px; border-radius: 3px; background: var(--navy); }
+
+  /* ── STARS ── */
+  .stars { color: var(--gold); font-size: 12px; letter-spacing: 1px; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 40px 20px; color: var(--text-muted);
+  }
+  .empty-state svg { width: 40px; height: 40px; margin: 0 auto 12px; opacity: .3; display: block; }
+  .empty-state p { font-size: 13px; }
+
+  /* ── LOADING ── */
+  #loading-overlay {
+    position: fixed; inset: 0; background: var(--navy);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 9999; transition: opacity .4s;
+  }
+  #loading-overlay .brand { font-size: 32px; font-weight: 600; color: #fff; letter-spacing: -.5px; }
+  #loading-overlay .brand span { color: var(--gold); }
+  #loading-overlay .loading-sub { font-size: 13px; color: rgba(255,255,255,.5); margin-top: 8px; }
+  .spinner {
+    width: 24px; height: 24px; border: 2px solid rgba(255,255,255,.2);
+    border-top-color: var(--gold); border-radius: 50%;
+    animation: spin .8s linear infinite; margin-top: 24px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.45);
+    display: none; align-items: center; justify-content: center; z-index: 200;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--white); border-radius: var(--radius);
+    padding: 24px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-title { font-size: 16px; font-weight: 600; }
+  .modal-close { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; }
+  .modal-close:hover { color: var(--text); }
+  .modal-close svg { width: 18px; height: 18px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group-modal { margin-bottom: 14px; }
+  .form-group-modal label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 5px; }
+  .form-group-modal input,
+  .form-group-modal select,
+  .form-group-modal textarea {
+    width: 100%; padding: 8px 12px; border: 1px solid #d1d5db;
+    border-radius: var(--radius-sm); font-size: 13px; font-family: inherit;
+    color: var(--text); outline: none; transition: border-color .2s;
+    background: var(--white);
+  }
+  .form-group-modal input:focus,
+  .form-group-modal select:focus,
+  .form-group-modal textarea:focus { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(30,45,90,.08); }
+  .form-group-modal textarea { resize: vertical; min-height: 70px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .btn-secondary {
+    padding: 8px 16px; background: var(--bg); border: var(--border);
+    border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: inherit; color: var(--text);
+  }
+  .btn-secondary:hover { background: #e8eaf0; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--text); color: #fff;
+    padding: 10px 18px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0,0,0,.2);
+    transform: translateY(80px); opacity: 0;
+    transition: all .3s; z-index: 9999;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { background: var(--success); }
+  #toast.error { background: var(--danger); }
+
+  /* ── CANDIDATES PAGE ── */
+  .filter-bar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .filter-bar input, .filter-bar select {
+    padding: 7px 12px; border: var(--border); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: inherit; color: var(--text); background: var(--white);
+    outline: none;
+  }
+  .filter-bar input { flex: 1; min-width: 200px; }
+  .filter-bar input:focus, .filter-bar select:focus { border-color: var(--navy); }
+
+  .candidate-card {
+    background: var(--white); border: var(--border); border-radius: var(--radius);
+    padding: 14px 16px; display: flex; align-items: center; gap: 14px;
+    transition: box-shadow .15s;
+  }
+  .candidate-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,.08); }
+  .candidate-info { flex: 1; min-width: 0; }
+  .candidate-name { font-size: 13px; font-weight: 600; }
+  .candidate-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .candidate-tags { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+
+  /* ── NOMINA PAGE ── */
+  .nomina-summary {
+    background: var(--navy); border-radius: var(--radius);
+    padding: 20px 24px; color: #fff;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 20px;
+  }
+  .nomina-item .nom-label { font-size: 11px; color: rgba(255,255,255,.6); margin-bottom: 4px; }
+  .nomina-item .nom-value { font-size: 22px; font-weight: 600; }
+  .nomina-item .nom-sub { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 2px; }
+
+  /* ── COTIZADOR ── */
+  .cotizador-box {
+    background: var(--white); border: var(--border); border-radius: var(--radius); padding: 20px;
+  }
+  .cotizador-result {
+    background: var(--navy-pale); border: 1px solid #c5d0f0;
+    border-radius: var(--radius); padding: 16px 20px; margin-top: 16px;
+  }
+  .result-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0; border-bottom: 1px solid #dde3f5; font-size: 13px;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-row.highlight { font-weight: 600; font-size: 15px; color: var(--navy); }
+  .cotizador-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ── DOCUMENTOS ── */
+  .doc-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 0; border-bottom: 1px solid #f0f1f5; font-size: 12px;
+  }
+  .doc-item:last-child { border-bottom: none; }
+
+  @media (max-width: 900px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .cotizador-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-overlay">
+  <div class="brand">Staff<span>Core</span></div>
+  <div class="loading-sub">Cargando plataforma...</div>
+  <div class="spinner"></div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="brand">Staff<span>Core</span></div>
+      <div class="sub">Sistema de gestión para agencias de empleo</div>
+    </div>
+    <div class="form-group">
+      <label>Correo electrónico</label>
+      <input type="email" id="login-email" placeholder="agencia@ejemplo.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-login" id="btn-login">Iniciar sesión</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-brand">
+      <div class="logo">Staff<span>Core</span></div>
+      <div class="agency-name" id="sb-agency-name">Cargando...</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section">Principal</div>
+      <button class="sb-item active" data-page="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </button>
+
+      <div class="sb-section">Reclutamiento</div>
+      <button class="sb-item" data-page="candidatos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Candidatos<span class="sb-badge" id="badge-candidatos">0</span></button>
+      <button class="sb-item" data-page="vacantes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Vacantes</button>
+      <button class="sb-item" data-page="entrevistas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Entrevistas</button>
+      <button class="sb-item" data-page="talentmatch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Talent Match</button>
+      <button class="sb-item" data-page="semaforo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Semáforo de riesgo</button>
+      <button class="sb-item" data-page="antighosting"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Antighosting</button>
+
+      <div class="sb-section">Empleados</div>
+      <button class="sb-item" data-page="empleados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Empleados activos</button>
+      <button class="sb-item" data-page="asistencia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Asistencia GPS</button>
+      <button class="sb-item" data-page="documentos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>Documentos<span class="sb-badge" id="badge-docs">0</span></button>
+      <button class="sb-item" data-page="capacitacion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Capacitación</button>
+
+      <div class="sb-section">Empresas</div>
+      <button class="sb-item" data-page="empresas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Empresas clientes</button>
+      <button class="sb-item" data-page="contactos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Contactos</button>
+      <button class="sb-item" data-page="solicitudes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Solicitudes de personal</button>
+
+      <div class="sb-section">Nómina y Finanzas</div>
+      <button class="sb-item" data-page="nomina"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Nómina</button>
+      <button class="sb-item" data-page="horas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Horas trabajadas</button>
+      <button class="sb-item" data-page="cotizador"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Cotizador de servicios</button>
+      <button class="sb-item" data-page="facturacion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Facturación</button>
+      <button class="sb-item" data-page="rentabilidad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Centro de rentabilidad</button>
+
+      <div class="sb-section">Herramientas</div>
+      <button class="sb-item" data-page="reemplazo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Reemplazo urgente</button>
+      <button class="sb-item" data-page="comunicacion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Comunicación</button>
+      <button class="sb-item" data-page="reportes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>Reportes</button>
+      <button class="sb-item" data-page="calendario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Calendario</button>
+      <button class="sb-item" data-page="ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Ajustes</button>
+    </nav>
+    <div class="sb-user">
+      <div class="avatar av-navy" id="sb-avatar">--</div>
+      <div class="sb-user-info">
+        <div class="name" id="sb-username">Usuario</div>
+        <div class="role">Administrador</div>
+      </div>
+      <button class="btn-logout" id="btn-logout" title="Cerrar sesión">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="page-title" id="topbar-title">Dashboard</div>
+        <div class="page-sub" id="topbar-sub">Resumen general de tu agencia</div>
+      </div>
+      <div class="topbar-right">
+        <div class="icon-btn" id="notif-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <div class="notif-dot" id="notif-dot"></div>
+        </div>
+        <button class="btn-primary" id="btn-nueva-accion">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nueva acción
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Candidatos registrados</div>
+          <div class="stat-value" id="stat-candidatos">–</div>
+          <div class="stat-trend trend-up" id="stat-candidatos-trend">Cargando...</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Empleados activos</div>
+          <div class="stat-value" id="stat-empleados">–</div>
+          <div class="stat-trend trend-neu" id="stat-empleados-trend">Cargando...</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">Empresas clientes</div>
+          <div class="stat-value" id="stat-empresas">–</div>
+          <div class="stat-trend trend-neu" id="stat-empresas-trend">Cargando...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Vacantes abiertas</div>
+          <div class="stat-value" id="stat-vacantes">–</div>
+          <div class="stat-trend trend-neu">Esta semana</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Alertas activas</div>
+          <div class="stat-value" id="stat-alertas">–</div>
+          <div class="stat-trend trend-down">Requieren atención</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Semaforo -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Semáforo de riesgo
+            </div>
+            <span class="card-link" onclick="goTo('semaforo')">Ver todos</span>
+          </div>
+          <div class="risk-list" id="dash-semaforo">
+            <div class="empty-state"><p>Cargando...</p></div>
+          </div>
+        </div>
+
+        <!-- Alertas -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Alertas importantes
+            </div>
+            <span class="card-link">Ver todas</span>
+          </div>
+          <div class="alert-list" id="dash-alertas">
+            <div class="empty-state"><p>Cargando...</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Talent Match -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Talent Match — mejores candidatos disponibles
+          </div>
+          <span class="card-link" onclick="goTo('candidatos')">Ver todos</span>
+        </div>
+        <div id="dash-talent-match">
+          <div class="empty-state"><p>Cargando candidatos...</p></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Empleados recientes -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Empleados activos recientes
+            </div>
+            <span class="card-link" onclick="goTo('empleados')">Ver todos</span>
+          </div>
+          <table class="sc-table" id="dash-empleados-table">
+            <thead><tr><th>Nombre</th><th>Empresa</th><th>Asistencia</th><th>Riesgo</th></tr></thead>
+            <tbody id="dash-empleados-body">
+              <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Rentabilidad -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Centro de rentabilidad
+            </div>
+            <span class="card-link" onclick="goTo('facturacion')">Ver reporte</span>
+          </div>
+          <div id="dash-rentabilidad">
+            <div class="empty-state"><p>Agrega empresas clientes para ver rentabilidad</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CANDIDATOS ══ -->
+    <div class="page" id="page-candidatos">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div class="filter-bar" style="flex:1">
+          <input type="text" id="search-candidatos" placeholder="Buscar candidato..." oninput="renderCandidatos()">
+          <select id="filter-estado" onchange="renderCandidatos()">
+            <option value="">Todos los estados</option>
+            <option value="Nuevo">Nuevo</option>
+            <option value="Contactado">Contactado</option>
+            <option value="Entrevistado">Entrevistado</option>
+            <option value="Aprobado">Aprobado</option>
+            <option value="Contratado">Contratado</option>
+            <option value="Rechazado">Rechazado</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
+        <button class="btn-primary" onclick="openModal('modal-candidato')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nuevo candidato
+        </button>
+      </div>
+      <div id="candidatos-list" style="display:flex;flex-direction:column;gap:10px">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <p>No hay candidatos aún. ¡Agrega el primero!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VACANTES ══ -->
+    <div class="page" id="page-vacantes">
+      <div style="display:flex;justify-content:flex-end">
+        <button class="btn-primary" onclick="openModal('modal-vacante')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nueva vacante
+        </button>
+      </div>
+      <div id="vacantes-list">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+          <p>No hay vacantes registradas.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ EMPLEADOS ══ -->
+    <div class="page" id="page-empleados">
+      <div style="display:flex;justify-content:flex-end">
+        <button class="btn-primary" onclick="openModal('modal-empleado')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar empleado
+        </button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="sc-table">
+          <thead><tr><th>Empleado</th><th>Puesto</th><th>Empresa</th><th>Inicio</th><th>Asistencia</th><th>Riesgo</th><th></th></tr></thead>
+          <tbody id="empleados-body">
+            <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px">Sin empleados registrados</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ DOCUMENTOS ══ -->
+    <div class="page" id="page-documentos">
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚠️ Por vencer (30 días)</div></div>
+          <div id="docs-vencer"><div class="empty-state"><p>Sin alertas</p></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🔴 Vencidos</div></div>
+          <div id="docs-vencidos"><div class="empty-state"><p>Sin documentos vencidos</p></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">✅ Al día</div></div>
+          <div id="docs-ok"><div class="empty-state"><p>Agrega empleados para ver sus documentos</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SEMAFORO ══ -->
+    <div class="page" id="page-semaforo">
+      <div class="grid-3">
+        <div class="card" style="border-top:3px solid #ef4444">
+          <div class="card-header"><div class="card-title">🔴 Alto riesgo</div></div>
+          <div class="risk-list" id="semaforo-rojo"><div class="empty-state"><p>Sin empleados en alto riesgo</p></div></div>
+        </div>
+        <div class="card" style="border-top:3px solid #f59e0b">
+          <div class="card-header"><div class="card-title">🟡 Riesgo medio</div></div>
+          <div class="risk-list" id="semaforo-amarillo"><div class="empty-state"><p>Sin empleados en riesgo medio</p></div></div>
+        </div>
+        <div class="card" style="border-top:3px solid #22c55e">
+          <div class="card-header"><div class="card-title">🟢 Bajo riesgo</div></div>
+          <div class="risk-list" id="semaforo-verde"><div class="empty-state"><p>Sin empleados</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ EMPRESAS ══ -->
+    <div class="page" id="page-empresas">
+      <div style="display:flex;justify-content:flex-end">
+        <button class="btn-primary" onclick="openModal('modal-empresa')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nueva empresa
+        </button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="sc-table">
+          <thead><tr><th>Empresa</th><th>Contacto</th><th>Teléfono</th><th>Empleados</th><th>Tarifa/hr</th><th>Estado</th></tr></thead>
+          <tbody id="empresas-body">
+            <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Sin empresas registradas</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ NOMINA ══ -->
+    <div class="page" id="page-nomina">
+      <div class="nomina-summary">
+        <div class="nomina-item">
+          <div class="nom-label">Total a pagar</div>
+          <div class="nom-value" id="nom-total">$0.00</div>
+          <div class="nom-sub">Esta semana</div>
+        </div>
+        <div class="nomina-item">
+          <div class="nom-label">Empleados en nómina</div>
+          <div class="nom-value" id="nom-empleados">0</div>
+          <div class="nom-sub">Activos</div>
+        </div>
+        <div class="nomina-item">
+          <div class="nom-label">Horas totales</div>
+          <div class="nom-value" id="nom-horas">0</div>
+          <div class="nom-sub">Semana actual</div>
+        </div>
+        <div class="nomina-item">
+          <div class="nom-label">Pago regular</div>
+          <div class="nom-value" id="nom-regular">$0.00</div>
+          <div class="nom-sub">Sin horas extra</div>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="sc-table">
+          <thead><tr><th>Empleado</th><th>Empresa</th><th>Hrs regulares</th><th>Hrs extra</th><th>$/hr</th><th>Pago bruto</th><th>Estado</th></tr></thead>
+          <tbody id="nomina-body">
+            <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px">Agrega empleados para calcular nómina</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ COTIZADOR ══ -->
+    <div class="page" id="page-cotizador">
+      <div class="grid-2">
+        <div class="cotizador-box">
+          <div class="card-title" style="margin-bottom:16px;font-size:14px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
+            Calculadora de cotización
+          </div>
+          <div class="cotizador-grid">
+            <div class="form-group-modal">
+              <label>Puesto solicitado</label>
+              <input type="text" id="cot-puesto" placeholder="Ej. Operario de almacén" oninput="calcCotizador()">
+            </div>
+            <div class="form-group-modal">
+              <label>Empresa cliente</label>
+              <input type="text" id="cot-empresa" placeholder="Ej. ABC Logistics" oninput="calcCotizador()">
+            </div>
+            <div class="form-group-modal">
+              <label>Pago al trabajador ($/hr)</label>
+              <input type="number" id="cot-pago" value="16" min="0" step="0.5" oninput="calcCotizador()">
+            </div>
+            <div class="form-group-modal">
+              <label>Horas semanales</label>
+              <input type="number" id="cot-horas" value="40" min="1" max="80" oninput="calcCotizador()">
+            </div>
+            <div class="form-group-modal">
+              <label>Número de trabajadores</label>
+              <input type="number" id="cot-trabajadores" value="5" min="1" oninput="calcCotizador()">
+            </div>
+            <div class="form-group-modal">
+              <label>Margen deseado (%)</label>
+              <input type="number" id="cot-margen" value="30" min="1" max="100" oninput="calcCotizador()">
+            </div>
+            <div class="form-group-modal">
+              <label>Workers Comp (%)</label>
+              <input type="number" id="cot-wc" value="4" min="0" oninput="calcCotizador()">
+            </div>
+            <div class="form-group-modal">
+              <label>Payroll taxes (%)</label>
+              <input type="number" id="cot-taxes" value="7.65" min="0" step="0.05" oninput="calcCotizador()">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="cotizador-result" id="cotizador-result">
+            <div class="card-title" style="margin-bottom:14px;font-size:13px;color:var(--navy)">Resultado de la cotización</div>
+            <div class="result-row"><span>Costo base por empleado/hr</span><span id="r-costo-base">$0.00</span></div>
+            <div class="result-row"><span>Workers Comp por hora</span><span id="r-wc">$0.00</span></div>
+            <div class="result-row"><span>Payroll taxes por hora</span><span id="r-taxes">$0.00</span></div>
+            <div class="result-row"><span>Costo real por hora</span><span id="r-costo-real">$0.00</span></div>
+            <div class="result-row highlight"><span>Tarifa a cobrar ($/hr)</span><span id="r-tarifa" style="color:var(--success)">$0.00</span></div>
+            <div class="result-row"><span>Ganancia por hora</span><span id="r-ganancia-hr">$0.00</span></div>
+            <div class="result-row"><span>Ganancia semanal</span><span id="r-ganancia-sem">$0.00</span></div>
+            <div class="result-row highlight"><span>Ganancia mensual estimada</span><span id="r-ganancia-mes" style="color:var(--navy)">$0.00</span></div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:10px">
+            <button class="btn-primary" style="flex:1" onclick="showToast('Propuesta generada (PDF próximamente)', 'success')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+              Generar propuesta PDF
+            </button>
+            <button class="btn-secondary" onclick="showToast('Cotización guardada', 'success')">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FACTURACION ══ -->
+    <div class="page" id="page-facturacion">
+      <div class="stats-grid">
+        <div class="stat-card green">
+          <div class="stat-label">Total facturado (mes)</div>
+          <div class="stat-value" id="fact-total">$0</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Pendiente de cobro</div>
+          <div class="stat-value" id="fact-pendiente">$0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Facturas emitidas</div>
+          <div class="stat-value" id="fact-count">0</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end">
+        <button class="btn-primary" onclick="openModal('modal-factura')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nueva factura
+        </button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="sc-table">
+          <thead><tr><th>#</th><th>Empresa</th><th>Período</th><th>Monto</th><th>Estado</th><th>Vence</th></tr></thead>
+          <tbody id="facturas-body">
+            <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Sin facturas registradas</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /main-wrap -->
+</div><!-- /app-screen -->
+
+<!-- ════ MODALS ════ -->
+
+<!-- Candidato -->
+<div class="modal-overlay" id="modal-candidato">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nuevo candidato</div>
+      <button class="modal-close" onclick="closeModal('modal-candidato')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="form-row">
+      <div class="form-group-modal"><label>Nombre *</label><input type="text" id="c-nombre" placeholder="Nombre completo"></div>
+      <div class="form-group-modal"><label>Teléfono *</label><input type="tel" id="c-tel" placeholder="(407) 000-0000"></div>
+      <div class="form-group-modal"><label>Email</label><input type="email" id="c-email" placeholder="correo@ejemplo.com"></div>
+      <div class="form-group-modal"><label>Puesto deseado</label><input type="text" id="c-puesto" placeholder="Ej. Operario almacén"></div>
+      <div class="form-group-modal"><label>Ciudad / Área</label><input type="text" id="c-ciudad" placeholder="Ej. Orlando, FL"></div>
+      <div class="form-group-modal"><label>Transporte</label>
+        <select id="c-transporte"><option>Propio</option><option>Necesita ride</option><option>Licencia sin auto</option></select>
+      </div>
+      <div class="form-group-modal"><label>Disponibilidad</label>
+        <select id="c-disponibilidad"><option>Inmediata</option><option>1 semana</option><option>2 semanas</option><option>1 mes</option></select>
+      </div>
+      <div class="form-group-modal"><label>Idioma</label>
+        <select id="c-idioma"><option>Español</option><option>Inglés</option><option>Bilingüe</option></select>
+      </div>
+    </div>
+    <div class="form-group-modal"><label>Experiencia laboral</label><textarea id="c-experiencia" placeholder="Describe la experiencia más reciente..."></textarea></div>
+    <div class="form-group-modal"><label>Notas internas</label><textarea id="c-notas" placeholder="Notas privadas del reclutador..." style="min-height:50px"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-candidato')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarCandidato()">Guardar candidato</button>
+    </div>
+  </div>
+</div>
+
+<!-- Empleado -->
+<div class="modal-overlay" id="modal-empleado">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Agregar empleado activo</div>
+      <button class="modal-close" onclick="closeModal('modal-empleado')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="form-row">
+      <div class="form-group-modal"><label>Nombre *</label><input type="text" id="e-nombre" placeholder="Nombre completo"></div>
+      <div class="form-group-modal"><label>Puesto *</label><input type="text" id="e-puesto" placeholder="Ej. Operario almacén"></div>
+      <div class="form-group-modal"><label>Empresa cliente *</label><input type="text" id="e-empresa" placeholder="Ej. ABC Logistics"></div>
+      <div class="form-group-modal"><label>Fecha de inicio</label><input type="date" id="e-inicio"></div>
+      <div class="form-group-modal"><label>Pago por hora ($)</label><input type="number" id="e-pago" value="16" min="0" step="0.5"></div>
+      <div class="form-group-modal"><label>Horas semanales</label><input type="number" id="e-horas" value="40" min="1"></div>
+      <div class="form-group-modal"><label>Teléfono</label><input type="tel" id="e-tel" placeholder="(407) 000-0000"></div>
+      <div class="form-group-modal"><label>Nivel de riesgo</label>
+        <select id="e-riesgo"><option value="Bajo">🟢 Bajo</option><option value="Medio">🟡 Medio</option><option value="Alto">🔴 Alto</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-empleado')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEmpleado()">Guardar empleado</button>
+    </div>
+  </div>
+</div>
+
+<!-- Vacante -->
+<div class="modal-overlay" id="modal-vacante">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nueva vacante</div>
+      <button class="modal-close" onclick="closeModal('modal-vacante')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="form-row">
+      <div class="form-group-modal"><label>Empresa solicitante *</label><input type="text" id="v-empresa" placeholder="Ej. ABC Logistics"></div>
+      <div class="form-group-modal"><label>Puesto *</label><input type="text" id="v-puesto" placeholder="Ej. Montacarguista"></div>
+      <div class="form-group-modal"><label>Número de trabajadores</label><input type="number" id="v-cantidad" value="1" min="1"></div>
+      <div class="form-group-modal"><label>Pago por hora ($)</label><input type="number" id="v-pago" value="16" min="0" step="0.5"></div>
+      <div class="form-group-modal"><label>Horario</label><input type="text" id="v-horario" placeholder="Ej. Lun–Vie 6am–2:30pm"></div>
+      <div class="form-group-modal"><label>Fecha de inicio</label><input type="date" id="v-inicio"></div>
+    </div>
+    <div class="form-group-modal"><label>Requisitos</label><textarea id="v-requisitos" placeholder="Certificaciones, experiencia, idioma..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-vacante')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarVacante()">Guardar vacante</button>
+    </div>
+  </div>
+</div>
+
+<!-- Empresa -->
+<div class="modal-overlay" id="modal-empresa">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nueva empresa cliente</div>
+      <button class="modal-close" onclick="closeModal('modal-empresa')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="form-row">
+      <div class="form-group-modal"><label>Nombre de empresa *</label><input type="text" id="em-nombre" placeholder="Ej. ABC Logistics"></div>
+      <div class="form-group-modal"><label>Contacto principal</label><input type="text" id="em-contacto" placeholder="Nombre del gerente"></div>
+      <div class="form-group-modal"><label>Teléfono</label><input type="tel" id="em-tel" placeholder="(407) 000-0000"></div>
+      <div class="form-group-modal"><label>Email</label><input type="email" id="em-email" placeholder="gerente@empresa.com"></div>
+      <div class="form-group-modal"><label>Tarifa acordada ($/hr)</label><input type="number" id="em-tarifa" value="24" min="0" step="0.5"></div>
+      <div class="form-group-modal"><label>Ciudad</label><input type="text" id="em-ciudad" placeholder="Ej. Orlando, FL"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-empresa')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEmpresa()">Guardar empresa</button>
+    </div>
+  </div>
+</div>
+
+<!-- Factura -->
+<div class="modal-overlay" id="modal-factura">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nueva factura</div>
+      <button class="modal-close" onclick="closeModal('modal-factura')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="form-row">
+      <div class="form-group-modal"><label>Empresa *</label><input type="text" id="f-empresa" placeholder="Empresa cliente"></div>
+      <div class="form-group-modal"><label>Monto ($) *</label><input type="number" id="f-monto" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="form-group-modal"><label>Período</label><input type="text" id="f-periodo" placeholder="Ej. 13–19 mayo"></div>
+      <div class="form-group-modal"><label>Fecha de vencimiento</label><input type="date" id="f-vence"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-factura')">Cancelar</button>
+      <button class="btn-primary" onclick="guardarFactura()">Crear factura</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ════ FIREBASE + APP LOGIC ════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, browserLocalPersistence, setPersistence }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp, doc, updateDoc }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAnZXNV8tUCgUheOrI2p0due1Dj4S_tYCg",
+  authDomain: "immigration-platform-11380.firebaseapp.com",
+  projectId: "immigration-platform-11380",
+  storageBucket: "immigration-platform-11380.firebasestorage.app",
+  messagingSenderId: "682062748742",
+  appId: "1:682062748742:web:5b2466ddf7d8ae05a67e47",
+  measurementId: "G-3VXLEW9B2M"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Prefix for StaffCore collections
+const PREFIX = 'sc_';
+
+// ── STATE ──
+let currentUser = null;
+let officeId = null;
+let allCandidatos = [];
+let allEmpleados = [];
+let allEmpresas = [];
+let allVacantes = [];
+let allFacturas = [];
+
+// ── HELPERS ──
+window.showToast = function(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 3000);
+};
+
+window.openModal = function(id) {
+  document.getElementById(id).classList.add('open');
+};
+window.closeModal = function(id) {
+  document.getElementById(id).classList.remove('open');
+};
+
+window.goTo = function(page) {
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  const btn = document.querySelector(`.sb-item[data-page="${page}"]`);
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('page-' + page);
+  if (pg) pg.classList.add('active');
+  const titles = {
+    dashboard: ['Dashboard', 'Resumen general de tu agencia'],
+    candidatos: ['Candidatos', 'Gestión de candidatos registrados'],
+    vacantes: ['Vacantes', 'Puestos disponibles y en proceso'],
+    empleados: ['Empleados activos', 'Personal colocado en empresas cliente'],
+    documentos: ['Documentos', 'Control de documentos y vencimientos'],
+    semaforo: ['Semáforo de riesgo', 'Clasificación de empleados por nivel de riesgo'],
+    empresas: ['Empresas clientes', 'Directorio de empresas contratantes'],
+    nomina: ['Nómina', 'Cálculo de pagos semanales'],
+    cotizador: ['Cotizador de servicios', 'Calcula tarifas y rentabilidad'],
+    facturacion: ['Facturación', 'Control de facturas y cobros'],
+  };
+  if (titles[page]) {
+    document.getElementById('topbar-title').textContent = titles[page][0];
+    document.getElementById('topbar-sub').textContent = titles[page][1];
+  }
+};
+
+// Sidebar navigation
+document.querySelectorAll('.sb-item[data-page]').forEach(btn => {
+  btn.addEventListener('click', () => goTo(btn.dataset.page));
+});
+
+function initials(name) {
+  return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+}
+
+function riskBadge(risk) {
+  const map = { Alto: 'b-red', Medio: 'b-yellow', Bajo: 'b-green' };
+  return `<span class="badge ${map[risk] || 'b-gray'}">${risk || 'Bajo'}</span>`;
+}
+
+function statusBadge(status) {
+  const map = {
+    Nuevo: 'b-gray', Contactado: 'b-blue', Entrevistado: 'b-navy',
+    Aprobado: 'b-green', Contratado: 'b-green', Rechazado: 'b-red', Inactivo: 'b-gray',
+    Abierta: 'b-green', 'En proceso': 'b-yellow', Cubierta: 'b-navy', Cancelada: 'b-red',
+    Pagada: 'b-green', Pendiente: 'b-yellow', Vencida: 'b-red',
+  };
+  return `<span class="badge ${map[status] || 'b-gray'}">${status}</span>`;
+}
+
+// ── AUTH ──
+await setPersistence(auth, browserLocalPersistence);
+
+document.getElementById('btn-login').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch (e) {
+    errEl.textContent = 'Correo o contraseña incorrectos.';
+    errEl.style.display = 'block';
+  }
+});
+
+document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-pass').focus(); });
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('btn-login').click(); });
+
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await signOut(auth);
+});
+
+onAuthStateChanged(auth, async (user) => {
+  document.getElementById('loading-overlay').style.opacity = '0';
+  setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 400);
+
+  if (user) {
+    currentUser = user;
+    officeId = user.uid;
+
+    const emailParts = user.email.split('@');
+    const name = emailParts[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    document.getElementById('sb-username').textContent = name;
+    document.getElementById('sb-avatar').textContent = initials(name);
+    document.getElementById('sb-agency-name').textContent = user.email;
+
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
+
+    loadAll();
+    calcCotizador();
+  } else {
+    currentUser = null;
+    officeId = null;
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app-screen').style.display = 'none';
+  }
+});
+
+// ── LOAD DATA ──
+async function loadAll() {
+  await Promise.all([loadCandidatos(), loadEmpleados(), loadEmpresas(), loadVacantes(), loadFacturas()]);
+  renderDashboard();
+}
+
+async function loadCandidatos() {
+  const snap = await getDocs(query(collection(db, PREFIX + 'candidatos'), where('officeId', '==', officeId)));
+  allCandidatos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  document.getElementById('badge-candidatos').textContent = allCandidatos.length;
+  renderCandidatos();
+}
+
+async function loadEmpleados() {
+  const snap = await getDocs(query(collection(db, PREFIX + 'empleados'), where('officeId', '==', officeId)));
+  allEmpleados = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderEmpleados();
+  renderNomina();
+  renderSemaforo();
+}
+
+async function loadEmpresas() {
+  const snap = await getDocs(query(collection(db, PREFIX + 'empresas'), where('officeId', '==', officeId)));
+  allEmpresas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderEmpresas();
+}
+
+async function loadVacantes() {
+  const snap = await getDocs(query(collection(db, PREFIX + 'vacantes'), where('officeId', '==', officeId)));
+  allVacantes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderVacantes();
+}
+
+async function loadFacturas() {
+  const snap = await getDocs(query(collection(db, PREFIX + 'facturas'), where('officeId', '==', officeId)));
+  allFacturas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderFacturas();
+}
+
+// ── SAVE ──
+window.guardarCandidato = async function() {
+  const nombre = document.getElementById('c-nombre').value.trim();
+  if (!nombre) { showToast('El nombre es requerido', 'error'); return; }
+  try {
+    await addDoc(collection(db, PREFIX + 'candidatos'), {
+      officeId, nombre,
+      telefono: document.getElementById('c-tel').value.trim(),
+      email: document.getElementById('c-email').value.trim(),
+      puesto: document.getElementById('c-puesto').value.trim(),
+      ciudad: document.getElementById('c-ciudad').value.trim(),
+      transporte: document.getElementById('c-transporte').value,
+      disponibilidad: document.getElementById('c-disponibilidad').value,
+      idioma: document.getElementById('c-idioma').value,
+      experiencia: document.getElementById('c-experiencia').value.trim(),
+      notas: document.getElementById('c-notas').value.trim(),
+      estado: 'Nuevo',
+      confiabilidad: 5,
+      createdAt: serverTimestamp()
+    });
+    closeModal('modal-candidato');
+    showToast('Candidato registrado ✓', 'success');
+    await loadCandidatos();
+    renderDashboard();
+  } catch(e) { showToast('Error al guardar: ' + e.message, 'error'); }
+};
+
+window.guardarEmpleado = async function() {
+  const nombre = document.getElementById('e-nombre').value.trim();
+  const empresa = document.getElementById('e-empresa').value.trim();
+  if (!nombre || !empresa) { showToast('Nombre y empresa son requeridos', 'error'); return; }
+  try {
+    await addDoc(collection(db, PREFIX + 'empleados'), {
+      officeId, nombre, empresa,
+      puesto: document.getElementById('e-puesto').value.trim(),
+      inicio: document.getElementById('e-inicio').value,
+      pago: parseFloat(document.getElementById('e-pago').value) || 16,
+      horas: parseInt(document.getElementById('e-horas').value) || 40,
+      telefono: document.getElementById('e-tel').value.trim(),
+      riesgo: document.getElementById('e-riesgo').value,
+      asistencia: 100,
+      activo: true,
+      createdAt: serverTimestamp()
+    });
+    closeModal('modal-empleado');
+    showToast('Empleado registrado ✓', 'success');
+    await loadEmpleados();
+    renderDashboard();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+window.guardarVacante = async function() {
+  const empresa = document.getElementById('v-empresa').value.trim();
+  const puesto = document.getElementById('v-puesto').value.trim();
+  if (!empresa || !puesto) { showToast('Empresa y puesto son requeridos', 'error'); return; }
+  try {
+    await addDoc(collection(db, PREFIX + 'vacantes'), {
+      officeId, empresa, puesto,
+      cantidad: parseInt(document.getElementById('v-cantidad').value) || 1,
+      pago: parseFloat(document.getElementById('v-pago').value) || 16,
+      horario: document.getElementById('v-horario').value.trim(),
+      inicio: document.getElementById('v-inicio').value,
+      requisitos: document.getElementById('v-requisitos').value.trim(),
+      estado: 'Abierta',
+      createdAt: serverTimestamp()
+    });
+    closeModal('modal-vacante');
+    showToast('Vacante creada ✓', 'success');
+    await loadVacantes();
+    renderDashboard();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+window.guardarEmpresa = async function() {
+  const nombre = document.getElementById('em-nombre').value.trim();
+  if (!nombre) { showToast('El nombre de la empresa es requerido', 'error'); return; }
+  try {
+    await addDoc(collection(db, PREFIX + 'empresas'), {
+      officeId, nombre,
+      contacto: document.getElementById('em-contacto').value.trim(),
+      telefono: document.getElementById('em-tel').value.trim(),
+      email: document.getElementById('em-email').value.trim(),
+      tarifa: parseFloat(document.getElementById('em-tarifa').value) || 24,
+      ciudad: document.getElementById('em-ciudad').value.trim(),
+      estado: 'Activa',
+      createdAt: serverTimestamp()
+    });
+    closeModal('modal-empresa');
+    showToast('Empresa registrada ✓', 'success');
+    await loadEmpresas();
+    renderDashboard();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+window.guardarFactura = async function() {
+  const empresa = document.getElementById('f-empresa').value.trim();
+  const monto = parseFloat(document.getElementById('f-monto').value);
+  if (!empresa || !monto) { showToast('Empresa y monto son requeridos', 'error'); return; }
+  const num = 'F-' + Date.now().toString().slice(-6);
+  try {
+    await addDoc(collection(db, PREFIX + 'facturas'), {
+      officeId, empresa, monto, numero: num,
+      periodo: document.getElementById('f-periodo').value.trim(),
+      vence: document.getElementById('f-vence').value,
+      estado: 'Pendiente',
+      createdAt: serverTimestamp()
+    });
+    closeModal('modal-factura');
+    showToast('Factura creada ✓', 'success');
+    await loadFacturas();
+    renderDashboard();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+// ── RENDERS ──
+function renderDashboard() {
+  // Stats
+  document.getElementById('stat-candidatos').textContent = allCandidatos.length;
+  document.getElementById('stat-candidatos-trend').textContent = `${allCandidatos.filter(c=>c.estado==='Nuevo').length} nuevos pendientes`;
+  document.getElementById('stat-empleados').textContent = allEmpleados.filter(e=>e.activo).length;
+  document.getElementById('stat-empresas').textContent = allEmpresas.length;
+  document.getElementById('stat-vacantes').textContent = allVacantes.filter(v=>v.estado==='Abierta').length;
+  const alertCount = allEmpleados.filter(e=>e.riesgo==='Alto').length + allFacturas.filter(f=>f.estado==='Pendiente').length;
+  document.getElementById('stat-alertas').textContent = alertCount;
+  if (alertCount > 0) document.getElementById('notif-dot').style.display = 'block';
+
+  // Semáforo en dashboard
+  const semaEl = document.getElementById('dash-semaforo');
+  const riskEmp = allEmpleados.filter(e=>e.activo).slice(0, 5);
+  if (riskEmp.length === 0) {
+    semaEl.innerHTML = '<div class="empty-state"><p>Sin empleados registrados</p></div>';
+  } else {
+    semaEl.innerHTML = riskEmp.map(e => {
+      const dot = e.riesgo === 'Alto' ? 'r-red' : e.riesgo === 'Medio' ? 'r-yellow' : 'r-green';
+      const badge = e.riesgo === 'Alto' ? 'b-red' : e.riesgo === 'Medio' ? 'b-yellow' : 'b-green';
+      return `<div class="risk-row">
+        <div class="risk-dot ${dot}"></div>
+        <div class="risk-info"><div class="risk-name">${e.nombre}</div><div class="risk-reason">${e.puesto || '—'} · ${e.empresa || '—'}</div></div>
+        <span class="badge ${badge}">${e.riesgo || 'Bajo'}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Alertas en dashboard
+  const alertEl = document.getElementById('dash-alertas');
+  const alertas = [];
+  const altosRiesgo = allEmpleados.filter(e=>e.riesgo==='Alto').length;
+  if (altosRiesgo > 0) alertas.push({ type: 'ai-err', icon: '⚠', title: `${altosRiesgo} empleado(s) en alto riesgo`, sub: 'Requieren atención inmediata' });
+  const pendFacturas = allFacturas.filter(f=>f.estado==='Pendiente').length;
+  if (pendFacturas > 0) alertas.push({ type: 'ai-warn', icon: '💰', title: `${pendFacturas} factura(s) pendiente(s)`, sub: 'Por cobrar a empresas' });
+  const vacAbiertas = allVacantes.filter(v=>v.estado==='Abierta').length;
+  if (vacAbiertas > 0) alertas.push({ type: 'ai-info', icon: '📋', title: `${vacAbiertas} vacante(s) abiertas`, sub: 'Buscar candidatos compatibles' });
+  if (alertas.length === 0) alertas.push({ type: 'ai-suc', icon: '✓', title: 'Todo en orden', sub: 'Sin alertas activas' });
+  alertEl.innerHTML = alertas.map(a => `
+    <div class="alert-row">
+      <div class="alert-icon ${a.type}" style="font-size:14px;line-height:30px;text-align:center">${a.icon}</div>
+      <div class="alert-text"><div class="alert-title">${a.title}</div><div class="alert-sub">${a.sub}</div></div>
+    </div>`).join('');
+
+  // Talent Match
+  const tmEl = document.getElementById('dash-talent-match');
+  const disponibles = allCandidatos.filter(c => c.disponibilidad === 'Inmediata' || c.disponibilidad === '1 semana').slice(0, 4);
+  if (disponibles.length === 0) {
+    tmEl.innerHTML = '<div class="empty-state"><p>Registra candidatos con disponibilidad inmediata para ver el Talent Match</p></div>';
+  } else {
+    tmEl.innerHTML = disponibles.map((c, i) => {
+      const score = Math.max(75, 95 - (i * 4));
+      const color = score >= 90 ? '#16a34a' : score >= 80 ? '#1e2d5a' : '#d97706';
+      return `<div class="match-item">
+        <div class="avatar av-navy" style="width:30px;height:30px;font-size:11px">${initials(c.nombre)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:500">${c.nombre}</div>
+          <div style="font-size:11px;color:var(--text-muted)">${c.puesto || 'Sin puesto'} · ${c.disponibilidad}</div>
+        </div>
+        <div class="match-bar-bg"><div class="match-bar-fill" style="width:${score}%;background:${color}"></div></div>
+        <div class="match-pct" style="color:${color}">${score}%</div>
+        <span class="badge b-navy" style="cursor:pointer;font-size:10px">Enviar</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Empleados en dashboard
+  const empBody = document.getElementById('dash-empleados-body');
+  const recientes = allEmpleados.filter(e=>e.activo).slice(0, 5);
+  if (recientes.length === 0) {
+    empBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Sin empleados activos</td></tr>';
+  } else {
+    empBody.innerHTML = recientes.map(e => `
+      <tr>
+        <td><div style="font-size:12px;font-weight:500">${e.nombre}</div><div style="font-size:11px;color:var(--text-muted)">${e.puesto||'—'}</div></td>
+        <td>${e.empresa||'—'}</td>
+        <td><span style="color:var(--success);font-weight:500">${e.asistencia||100}%</span></td>
+        <td>${riskBadge(e.riesgo||'Bajo')}</td>
+      </tr>`).join('');
+  }
+
+  // Rentabilidad
+  const rentEl = document.getElementById('dash-rentabilidad');
+  if (allEmpresas.length === 0) {
+    rentEl.innerHTML = '<div class="empty-state"><p>Agrega empresas clientes para ver rentabilidad</p></div>';
+  } else {
+    const empSorted = [...allEmpresas].sort((a,b) => (b.tarifa||0)-(a.tarifa||0));
+    rentEl.innerHTML = empSorted.slice(0,5).map(e => {
+      const empCount = allEmpleados.filter(em=>em.empresa===e.nombre&&em.activo).length;
+      const ganancia = ((e.tarifa||24) - 20) * 40 * empCount;
+      const pct = Math.round(((e.tarifa||24) - 20) / (e.tarifa||24) * 100);
+      const barW = Math.min(100, pct * 2);
+      return `<div class="profit-row">
+        <span style="font-weight:500;min-width:100px">${e.nombre}</span>
+        <div class="profit-bar-wrap"><div class="profit-bar-bg"><div class="profit-bar-fill" style="width:${barW}%"></div></div></div>
+        <span style="color:var(--success);font-weight:500;min-width:36px">${pct}%</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+window.renderCandidatos = function() {
+  const search = document.getElementById('search-candidatos').value.toLowerCase();
+  const estado = document.getElementById('filter-estado').value;
+  const filtered = allCandidatos.filter(c => {
+    const matchSearch = !search || c.nombre.toLowerCase().includes(search) || (c.puesto||'').toLowerCase().includes(search);
+    const matchEstado = !estado || c.estado === estado;
+    return matchSearch && matchEstado;
+  });
+  const el = document.getElementById('candidatos-list');
+  if (filtered.length === 0) {
+    el.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><p>No se encontraron candidatos</p></div>';
+    return;
+  }
+  el.innerHTML = filtered.map(c => `
+    <div class="candidate-card">
+      <div class="avatar av-navy" style="width:38px;height:38px;font-size:13px">${initials(c.nombre)}</div>
+      <div class="candidate-info">
+        <div class="candidate-name">${c.nombre}</div>
+        <div class="candidate-sub">${c.puesto||'Sin puesto'} · ${c.ciudad||'—'} · ${c.telefono||'—'}</div>
+        <div class="candidate-tags">
+          ${statusBadge(c.estado||'Nuevo')}
+          <span class="badge b-gray">${c.transporte||'—'}</span>
+          <span class="badge b-gray">${c.disponibilidad||'—'}</span>
+          <span class="badge b-gray">${c.idioma||'—'}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <div class="stars">${'★'.repeat(Math.floor(c.confiabilidad||5))}${'☆'.repeat(5-Math.floor(c.confiabilidad||5))}</div>
+        <span style="font-size:10px;color:var(--text-muted)">Confiabilidad</span>
+      </div>
+    </div>`).join('');
+};
+
+function renderEmpleados() {
+  const body = document.getElementById('empleados-body');
+  if (allEmpleados.length === 0) {
+    body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px">Sin empleados registrados</td></tr>';
+    return;
+  }
+  body.innerHTML = allEmpleados.map(e => `
+    <tr>
+      <td><div style="font-size:12px;font-weight:500">${e.nombre}</div><div style="font-size:11px;color:var(--text-muted)">${e.telefono||'—'}</div></td>
+      <td>${e.puesto||'—'}</td>
+      <td>${e.empresa||'—'}</td>
+      <td>${e.inicio||'—'}</td>
+      <td><span style="color:var(--success);font-weight:500">${e.asistencia||100}%</span></td>
+      <td>${riskBadge(e.riesgo||'Bajo')}</td>
+      <td><span style="font-size:11px;color:var(--navy);cursor:pointer">Ver</span></td>
+    </tr>`).join('');
+}
+
+function renderVacantes() {
+  const el = document.getElementById('vacantes-list');
+  if (allVacantes.length === 0) {
+    el.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><p>No hay vacantes registradas.</p></div>';
+    return;
+  }
+  el.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px">' + allVacantes.map(v => `
+    <div class="card" style="padding:14px 16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div>
+          <div style="font-size:13px;font-weight:600">${v.puesto}</div>
+          <div style="font-size:12px;color:var(--text-muted)">${v.empresa} · ${v.horario||'Horario por definir'}</div>
+        </div>
+        ${statusBadge(v.estado||'Abierta')}
+      </div>
+      <div style="display:flex;gap:10px;font-size:11px;color:var(--text-muted)">
+        <span>💰 $${v.pago||0}/hr</span>
+        <span>👥 ${v.cantidad||1} trabajadores</span>
+        <span>📅 ${v.inicio||'Fecha TBD'}</span>
+      </div>
+      ${v.requisitos ? `<div style="font-size:11px;color:var(--text-muted);margin-top:6px;padding-top:6px;border-top:1px solid #f0f1f5">${v.requisitos}</div>` : ''}
+    </div>`).join('') + '</div>';
+}
+
+function renderEmpresas() {
+  const body = document.getElementById('empresas-body');
+  if (allEmpresas.length === 0) {
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Sin empresas registradas</td></tr>';
+    return;
+  }
+  body.innerHTML = allEmpresas.map(e => {
+    const empCount = allEmpleados.filter(em=>em.empresa===e.nombre&&em.activo).length;
+    return `<tr>
+      <td><div style="font-size:12px;font-weight:500">${e.nombre}</div><div style="font-size:11px;color:var(--text-muted)">${e.ciudad||'—'}</div></td>
+      <td>${e.contacto||'—'}</td>
+      <td>${e.telefono||'—'}</td>
+      <td>${empCount}</td>
+      <td>$${e.tarifa||0}/hr</td>
+      <td>${statusBadge(e.estado||'Activa')}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderNomina() {
+  const activos = allEmpleados.filter(e=>e.activo);
+  let totalPago = 0;
+  let totalHoras = 0;
+  const body = document.getElementById('nomina-body');
+  if (activos.length === 0) {
+    body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px">Agrega empleados para calcular nómina</td></tr>';
+    return;
+  }
+  body.innerHTML = activos.map(e => {
+    const hReg = Math.min(40, e.horas||40);
+    const hExtra = Math.max(0, (e.horas||40) - 40);
+    const pago = e.pago || 16;
+    const bruto = (hReg * pago) + (hExtra * pago * 1.5);
+    totalPago += bruto;
+    totalHoras += (e.horas||40);
+    return `<tr>
+      <td style="font-size:12px;font-weight:500">${e.nombre}</td>
+      <td>${e.empresa||'—'}</td>
+      <td>${hReg}h</td>
+      <td>${hExtra > 0 ? hExtra + 'h' : '—'}</td>
+      <td>$${pago.toFixed(2)}</td>
+      <td style="font-weight:500;color:var(--success)">$${bruto.toFixed(2)}</td>
+      <td><span class="badge b-yellow">Pendiente</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('nom-total').textContent = '$' + totalPago.toFixed(2);
+  document.getElementById('nom-empleados').textContent = activos.length;
+  document.getElementById('nom-horas').textContent = totalHoras;
+  document.getElementById('nom-regular').textContent = '$' + (activos.reduce((s,e) => s + Math.min(40,e.horas||40)*(e.pago||16), 0)).toFixed(2);
+}
+
+function renderSemaforo() {
+  const groups = { Alto: [], Medio: [], Bajo: [] };
+  allEmpleados.filter(e=>e.activo).forEach(e => {
+    const r = e.riesgo || 'Bajo';
+    if (groups[r]) groups[r].push(e);
+  });
+  const makeList = (arr) => arr.length === 0
+    ? '<div class="empty-state" style="padding:20px"><p>Sin empleados en esta categoría</p></div>'
+    : arr.map(e => `<div class="risk-row">
+        <div class="risk-dot ${e.riesgo==='Alto'?'r-red':e.riesgo==='Medio'?'r-yellow':'r-green'}"></div>
+        <div class="risk-info"><div class="risk-name">${e.nombre}</div><div class="risk-reason">${e.puesto||'—'} · ${e.empresa||'—'}</div></div>
+      </div>`).join('');
+  document.getElementById('semaforo-rojo').innerHTML = makeList(groups.Alto);
+  document.getElementById('semaforo-amarillo').innerHTML = makeList(groups.Medio);
+  document.getElementById('semaforo-verde').innerHTML = makeList(groups.Bajo);
+}
+
+function renderFacturas() {
+  const body = document.getElementById('facturas-body');
+  let total = 0, pendiente = 0;
+  if (allFacturas.length === 0) {
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Sin facturas registradas</td></tr>';
+  } else {
+    body.innerHTML = allFacturas.map(f => {
+      total += f.monto || 0;
+      if (f.estado === 'Pendiente') pendiente += f.monto || 0;
+      return `<tr>
+        <td style="font-family:monospace;font-size:11px">${f.numero||'—'}</td>
+        <td style="font-weight:500">${f.empresa}</td>
+        <td>${f.periodo||'—'}</td>
+        <td style="font-weight:500">$${(f.monto||0).toFixed(2)}</td>
+        <td>${statusBadge(f.estado||'Pendiente')}</td>
+        <td>${f.vence||'—'}</td>
+      </tr>`;
+    }).join('');
+  }
+  document.getElementById('fact-total').textContent = '$' + total.toLocaleString('en-US', {minimumFractionDigits:0});
+  document.getElementById('fact-pendiente').textContent = '$' + pendiente.toLocaleString('en-US', {minimumFractionDigits:0});
+  document.getElementById('fact-count').textContent = allFacturas.length;
+}
+
+// ── COTIZADOR ──
+window.calcCotizador = function() {
+  const pago = parseFloat(document.getElementById('cot-pago')?.value) || 16;
+  const horas = parseFloat(document.getElementById('cot-horas')?.value) || 40;
+  const trabajadores = parseInt(document.getElementById('cot-trabajadores')?.value) || 1;
+  const margen = parseFloat(document.getElementById('cot-margen')?.value) || 30;
+  const wc = parseFloat(document.getElementById('cot-wc')?.value) || 4;
+  const taxes = parseFloat(document.getElementById('cot-taxes')?.value) || 7.65;
+
+  const wcAmt = pago * (wc / 100);
+  const taxesAmt = pago * (taxes / 100);
+  const costoReal = pago + wcAmt + taxesAmt;
+  const tarifa = costoReal / (1 - margen / 100);
+  const gananciaHr = tarifa - costoReal;
+  const gananciaSem = gananciaHr * horas * trabajadores;
+  const gananciaMes = gananciaSem * 4.33;
+
+  const fmt = (n) => '$' + n.toFixed(2);
+  document.getElementById('r-costo-base').textContent = fmt(pago);
+  document.getElementById('r-wc').textContent = fmt(wcAmt);
+  document.getElementById('r-taxes').textContent = fmt(taxesAmt);
+  document.getElementById('r-costo-real').textContent = fmt(costoReal);
+  document.getElementById('r-tarifa').textContent = fmt(tarifa);
+  document.getElementById('r-ganancia-hr').textContent = fmt(gananciaHr);
+  document.getElementById('r-ganancia-sem').textContent = fmt(gananciaSem);
+  document.getElementById('r-ganancia-mes').textContent = fmt(gananciaMes);
+};
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// Nueva acción button
+document.getElementById('btn-nueva-accion').addEventListener('click', () => {
+  const activePage = document.querySelector('.page.active')?.id?.replace('page-','');
+  const map = {
+    candidatos: 'modal-candidato', empleados: 'modal-empleado',
+    vacantes: 'modal-vacante', empresas: 'modal-empresa', facturacion: 'modal-factura'
+  };
+  openModal(map[activePage] || 'modal-candidato');
+});
+</script>
+</body>
+</html>
